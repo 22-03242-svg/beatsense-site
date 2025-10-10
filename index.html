@@ -111,9 +111,10 @@
     });
 
     // Auto-load Jupyter notebook from GitHub Pages via nbviewer
-    const GITHUB_USERNAME = "YOUR_GITHUB_USERNAME";  // 🟡 CHANGE THIS
-    const REPO_NAME = "YOUR_REPO_NAME";              // 🟡 CHANGE THIS
-    const FILE_NAME = "BeatSense_Project.ipynb";
+  const GITHUB_USERNAME = "ylona";         // your GitHub username
+const REPO_NAME = "BeatSense";           // your repo name
+const FILE_NAME = "BeatSense_Project.ipynb";
+
 
     const nbviewerURL = `https://nbviewer.org/github/${GITHUB_USERNAME}/${REPO_NAME}/blob/main/${FILE_NAME}`;
     document.getElementById("notebookFrame").src = nbviewerURL;
