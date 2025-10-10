@@ -1,256 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF--8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BeatSense: Python-Based Arrhythmia Detection</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .hero-bg {
-            background-color: #f0f4ff;
-        }
-        .section-title {
-            @apply text-3xl font-bold text-gray-800 mb-8 text-center;
-        }
-        .card {
-            @apply bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .hero-bg { background-color: #f0f4ff; }
+        .section-title { font-size: 1.875rem; font-weight: 700; text-align: center; margin-bottom: 2rem; color: #1f2937; }
+        .card { background: white; border-radius: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1.5rem; transition: all 0.3s; }
+        .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-700">
 
-    <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-bold text-blue-600">
-                BeatSense
-            </div>
-            <div class="hidden md:flex space-x-8">
-                <a href="#about" class="text-gray-600 hover:text-blue-600">About</a>
-                <a href="#how-it-works" class="text-gray-600 hover:text-blue-600">How It Works</a>
-                <a href="#arrhythmias" class="text-gray-600 hover:text-blue-600">Arrhythmias Detected</a>
-                <a href="#research" class="text-gray-600 hover:text-blue-600">Research</a>
-                <a href="#team" class="text-gray-600 hover:text-blue-600">The Team</a>
-                <a href="#contact" class="text-gray-600 hover:text-blue-600">Contact</a>
-            </div>
-            <button id="mobile-menu-button" class="md:hidden">
-                <i data-lucide="menu"></i>
-            </button>
-        </nav>
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
-            <a href="#about" class="block py-2 text-gray-600 hover:text-blue-600">About</a>
-            <a href="#how-it-works" class="block py-2 text-gray-600 hover:text-blue-600">How It Works</a>
-            <a href="#arrhythmias" class="block py-2 text-gray-600 hover:text-blue-600">Arrhythmias Detected</a>
-            <a href="#research" class="block py-2 text-gray-600 hover:text-blue-600">Research</a>
-            <a href="#team" class="block py-2 text-gray-600 hover:text-blue-600">The Team</a>
-            <a href="#contact" class="block py-2 text-gray-600 hover:text-blue-600">Contact</a>
+<!-- Header -->
+<header class="bg-white shadow-sm sticky top-0 z-50">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="text-2xl font-bold text-blue-600">BeatSense</div>
+        <div class="hidden md:flex space-x-8">
+            <a href="#about" class="text-gray-600 hover:text-blue-600">About</a>
+            <a href="#how-it-works" class="text-gray-600 hover:text-blue-600">How It Works</a>
+            <a href="#arrhythmias" class="text-gray-600 hover:text-blue-600">Arrhythmias</a>
+            <a href="#notebook" class="text-gray-600 hover:text-blue-600">Notebook</a>
+            <a href="#team" class="text-gray-600 hover:text-blue-600">Team</a>
         </div>
-    </header>
+        <button id="mobile-menu-button" class="md:hidden">
+            <i data-lucide="menu"></i>
+        </button>
+    </nav>
+    <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+        <a href="#about" class="block py-2 text-gray-600 hover:text-blue-600">About</a>
+        <a href="#how-it-works" class="block py-2 text-gray-600 hover:text-blue-600">How It Works</a>
+        <a href="#arrhythmias" class="block py-2 text-gray-600 hover:text-blue-600">Arrhythmias</a>
+        <a href="#notebook" class="block py-2 text-gray-600 hover:text-blue-600">Notebook</a>
+        <a href="#team" class="block py-2 text-gray-600 hover:text-blue-600">Team</a>
+    </div>
+</header>
 
-    <!-- Hero Section -->
-    <main>
-        <section class="hero-bg" id="about">
-            <div class="container mx-auto px-6 py-20 text-center">
-                <h1 class="text-5xl font-bold text-gray-800 mb-4">Welcome to BeatSense</h1>
-                <p class="text-xl text-gray-600 mb-8">A Python-Based Arrhythmia Detection System Through Signal Processing</p>
-                <p class="max-w-3xl mx-auto text-gray-700 mb-8">
-                    Cardiovascular Diseases (CVDs) are the leading cause of death globally. BeatSense aims to provide a cost-effective, accessible, and non-invasive solution for monitoring cardiovascular health by detecting arrhythmias from ECG signals using advanced signal processing and machine learning techniques.
-                </p>
-                <a href="#how-it-works" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors">Learn More</a>
-            </div>
-        </section>
+<!-- Hero Section -->
+<section id="about" class="hero-bg text-center py-20">
+    <div class="container mx-auto px-6">
+        <h1 class="text-5xl font-bold mb-4 text-gray-800">Welcome to BeatSense</h1>
+        <p class="text-xl text-gray-600 mb-6">A Python-Based Arrhythmia Detection System Through Signal Processing</p>
+        <a href="#how-it-works" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">Learn More</a>
+    </div>
+</section>
 
-        <!-- How It Works Section -->
-        <section id="how-it-works" class="py-20">
-            <div class="container mx-auto px-6">
-                <h2 class="section-title">How BeatSense Works</h2>
-                <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-8 text-center">
-                    <!-- Step 1 -->
-                    <div class="flex flex-col items-center">
-                        <div class="bg-blue-100 rounded-full p-4 mb-4">
-                            <i data-lucide="database" class="text-blue-600 h-8 w-8"></i>
-                        </div>
-                        <h3 class="font-semibold text-lg mb-2">1. Data Acquisition</h3>
-                        <p class="text-sm">ECG recordings are collected from the MIT-BIH Arrhythmia Database, a standard resource for arrhythmia research.</p>
-                    </div>
-                    <!-- Step 2 -->
-                    <div class="flex flex-col items-center">
-                        <div class="bg-blue-100 rounded-full p-4 mb-4">
-                            <i data-lucide="siren" class="text-blue-600 h-8 w-8"></i>
-                        </div>
-                        <h3 class="font-semibold text-lg mb-2">2. Preprocessing</h3>
-                        <p class="text-sm">Digital filters are applied to remove noise from the ECG signals and segment them for analysis.</p>
-                    </div>
-                    <!-- Step 3 -->
-                    <div class="flex flex-col items-center">
-                        <div class="bg-blue-100 rounded-full p-4 mb-4">
-                           <i data-lucide="activity" class="text-blue-600 h-8 w-8"></i>
-                        </div>
-                        <h3 class="font-semibold text-lg mb-2">3. Feature Extraction</h3>
-                        <p class="text-sm">Key features like R-peaks and RR intervals are identified to represent the heart's rhythm.</p>
-                    </div>
-                    <!-- Step 4 -->
-                    <div class="flex flex-col items-center">
-                        <div class="bg-blue-100 rounded-full p-4 mb-4">
-                            <i data-lucide="brain-circuit" class="text-blue-600 h-8 w-8"></i>
-                        </div>
-                        <h3 class="font-semibold text-lg mb-2">4. Classification</h3>
-                        <p class="text-sm">Machine learning algorithms classify heartbeats as normal or arrhythmic.</p>
-                    </div>
-                    <!-- Step 5 -->
-                    <div class="flex flex-col items-center">
-                         <div class="bg-blue-100 rounded-full p-4 mb-4">
-                            <i data-lucide="bar-chart-2" class="text-blue-600 h-8 w-8"></i>
-                        </div>
-                        <h3 class="font-semibold text-lg mb-2">5. Analysis & Output</h3>
-                        <p class="text-sm">The system provides an output, categorizing the ECG sample and providing recommendations.</p>
-                    </div>
-                </div>
-                <div class="mt-16 flex justify-center">
-                     <img src="https://i.imgur.com/B9B2e8V.png" alt="BeatSense Research Framework" class="rounded-lg shadow-lg max-w-full h-auto md:max-w-3xl">
-                </div>
-            </div>
-        </section>
-
-        <!-- Arrhythmias Detected Section -->
-        <section id="arrhythmias" class="py-20 bg-gray-100">
-            <div class="container mx-auto px-6">
-                <h2 class="section-title">Arrhythmias Detected</h2>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div class="card">
-                        <h3 class="text-xl font-semibold mb-2 text-blue-600">Normal Sinus Rhythm</h3>
-                        <p>This is the normal, healthy heart rhythm, typically between 60 and 100 beats per minute.</p>
-                    </div>
-                    <div class="card">
-                        <h3 class="text-xl font-semibold mb-2 text-red-600">Bradycardia</h3>
-                        <p>A heart rate that's too slow, typically below 60 beats per minute. BeatSense identifies this condition for further analysis.</p>
-                    </div>
-                    <div class="card">
-                        <h3 class="text-xl font-semibold mb-2 text-red-600">Tachycardia</h3>
-                        <p>A heart rate that's too fast, typically above 100 beats per minute. BeatSense can further classify Tachycardia into several subtypes.</p>
-                    </div>
-                </div>
-                <div class="mt-8">
-                     <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">Types of Tachycardia</h3>
-                     <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-4 text-center">
-                        <div class="bg-white rounded-lg p-4 shadow-md">Superventricular Tachycardia</div>
-                        <div class="bg-white rounded-lg p-4 shadow-md">Ventricular Fibrillation</div>
-                        <div class="bg-white rounded-lg p-4 shadow-md">Ventricular Tachycardia</div>
-                        <div class="bg-white rounded-lg p-4 shadow-md">Atrial Fibrillation</div>
-                        <div class="bg-white rounded-lg p-4 shadow-md">Atrial Flutter</div>
-                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Research Section -->
-        <section id="research" class="py-20">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="section-title">Our Research</h2>
-                <p class="max-w-3xl mx-auto mb-8">
-                    Our work is based on the paper "BeatSense: Python-Based Arrhythmia Detection Through Signal Processing." This research outlines the development and validation of our system.
-                </p>
-                <a href="#" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors" onclick="alert('The full research paper would be linked here.'); return false;">
-                    Read The Full Paper (PDF)
-                </a>
-            </div>
-        </section>
-        
-        <!-- Team Section -->
-        <section id="team" class="py-20 bg-gray-100">
-            <div class="container mx-auto px-6">
-                <h2 class="section-title">Meet the Team</h2>
-                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div class="card text-center">
-                        <img src="https://placehold.co/128x128/EBF4FF/76A9FA?text=SE" class="rounded-full w-32 h-32 mx-auto mb-4" alt="Shena Marie Espelita">
-                        <h4 class="text-lg font-semibold">Shena Marie Espelita</h4>
-                    </div>
-                    <div class="card text-center">
-                         <img src="https://placehold.co/128x128/EBF4FF/76A9FA?text=JA" class="rounded-full w-32 h-32 mx-auto mb-4" alt="Jashley Mae Alcances">
-                        <h4 class="text-lg font-semibold">Jashley Mae Alcances</h4>
-                    </div>
-                    <div class="card text-center">
-                         <img src="https://placehold.co/128x128/EBF4FF/76A9FA?text=YB" class="rounded-full w-32 h-32 mx-auto mb-4" alt="Ylona Leigh Balahadia">
-                        <h4 class="text-lg font-semibold">Ylona Leigh Balahadia</h4>
-                    </div>
-                    <div class="card text-center">
-                         <img src="https://placehold.co/128x128/EBF4FF/76A9FA?text=MR" class="rounded-full w-32 h-32 mx-auto mb-4" alt="Mhekyla D. Ramirez">
-                        <h4 class="text-lg font-semibold">Mhekyla D. Ramirez</h4>
-                    </div>
-                </div>
-                 <div class="text-center mt-12">
-                    <h3 class="text-xl font-semibold text-gray-800">Advisor</h3>
-                    <p class="text-gray-600 mt-2">Dr. Abid Yaya</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" class="py-20">
-            <div class="container mx-auto px-6">
-                <h2 class="section-title">Contact Us</h2>
-                <p class="text-center max-w-2xl mx-auto mb-12">
-                    Have questions or want to collaborate? Reach out to us by filling out the form below.
-                </p>
-                <div class="max-w-xl mx-auto">
-                    <form action="#" method="POST" class="bg-white rounded-lg shadow-lg p-8">
-                        <div class="mb-6">
-                            <label for="name" class="block text-gray-700 font-medium mb-2">Name</label>
-                            <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                        <div class="mb-6">
-                            <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
-                            <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                        <div class="mb-6">
-                            <label for="message" class="block text-gray-700 font-medium mb-2">Message</label>
-                            <textarea id="message" name="message" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required></textarea>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors w-full">
-                                Send Message
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8">
-        <div class="container mx-auto px-6 text-center">
-            <p>&copy; 2025 BeatSense. All Rights Reserved.</p>
-            <p class="text-sm text-gray-400 mt-2">This website is for informational purposes only and is not intended for clinical diagnosis.</p>
+<!-- How It Works -->
+<section id="how-it-works" class="py-20">
+    <div class="container mx-auto px-6">
+        <h2 class="section-title">How BeatSense Works</h2>
+        <div class="grid md:grid-cols-5 gap-8 text-center">
+            <div><i data-lucide="database" class="text-blue-600 h-8 w-8 mb-2"></i><h3 class="font-semibold mb-1">Data Acquisition</h3><p>ECG data from MIT-BIH database.</p></div>
+            <div><i data-lucide="siren" class="text-blue-600 h-8 w-8 mb-2"></i><h3 class="font-semibold mb-1">Preprocessing</h3><p>Filters and noise reduction.</p></div>
+            <div><i data-lucide="activity" class="text-blue-600 h-8 w-8 mb-2"></i><h3 class="font-semibold mb-1">Feature Extraction</h3><p>Detect R-peaks and RR intervals.</p></div>
+            <div><i data-lucide="brain-circuit" class="text-blue-600 h-8 w-8 mb-2"></i><h3 class="font-semibold mb-1">Classification</h3><p>ML classifies arrhythmias.</p></div>
+            <div><i data-lucide="bar-chart-2" class="text-blue-600 h-8 w-8 mb-2"></i><h3 class="font-semibold mb-1">Output</h3><p>Results with recommendations.</p></div>
         </div>
-    </footer>
+    </div>
+</section>
 
-    <script>
-        lucide.createIcons();
-        
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
+<!-- Notebook Section -->
+<section id="notebook" class="py-20 bg-gray-100">
+    <div class="container mx-auto px-6 text-center">
+        <h2 class="section-title">Interactive Jupyter Notebook</h2>
+        <p class="max-w-2xl mx-auto mb-8 text-gray-600">Explore the <strong>BeatSense_Project.ipynb</strong> notebook directly below.</p>
 
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
+        <iframe id="notebookFrame" width="100%" height="800" frameborder="0" class="rounded-lg shadow-lg"></iframe>
 
-        // Close mobile menu when a link is clicked
-        const mobileMenuLinks = mobileMenu.getElementsByTagName('a');
-        for (let link of mobileMenuLinks) {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
-            });
-        }
-    </script>
+        <p class="text-sm text-gray-500 mt-4">
+            ⚙️ This notebook is automatically loaded from your GitHub repository.
+        </p>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section id="team" class="py-20">
+    <div class="container mx-auto px-6">
+        <h2 class="section-title">Meet the Team</h2>
+        <div class="grid md:grid-cols-4 gap-8 text-center">
+            <div class="card"><img src="https://placehold.co/128x128/EBF4FF/76A9FA?text=SE" class="rounded-full mx-auto mb-4"><h4>Shena Marie Espelita</h4></div>
+            <div class="card"><img src="https://placehold.co/128x128/EBF4FF/76A9FA?text=JA" class="rounded-full mx-auto mb-4"><h4>Jashley Mae Alcances</h4></div>
+            <div class="card"><img src="https://placehold.co/128x128/EBF4FF/76A9FA?text=YB" class="rounded-full mx-auto mb-4"><h4>Ylona Leigh Balahadia</h4></div>
+            <div class="card"><img src="https://placehold.co/128x128/EBF4FF/76A9FA?text=MR" class="rounded-full mx-auto mb-4"><h4>Mhekyla D. Ramirez</h4></div>
+        </div>
+        <div class="text-center mt-10">
+            <h3 class="font-semibold text-gray-800">Advisor</h3>
+            <p class="text-gray-600">Dr. Abid Yaya</p>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-8 text-center">
+    <p>&copy; 2025 BeatSense. All Rights Reserved.</p>
+</footer>
+
+<script>
+    lucide.createIcons();
+
+    // Mobile menu
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Auto-load Jupyter notebook from GitHub Pages via nbviewer
+    const GITHUB_USERNAME = "YOUR_GITHUB_USERNAME";  // 🟡 CHANGE THIS
+    const REPO_NAME = "YOUR_REPO_NAME";              // 🟡 CHANGE THIS
+    const FILE_NAME = "BeatSense_Project.ipynb";
+
+    const nbviewerURL = `https://nbviewer.org/github/${GITHUB_USERNAME}/${REPO_NAME}/blob/main/${FILE_NAME}`;
+    document.getElementById("notebookFrame").src = nbviewerURL;
+</script>
 
 </body>
 </html>
-
