@@ -1,53 +1,67 @@
-from flask import Flask, render_template, request, url_for
-import os
-from werkzeug.utils import secure_filename
-from analysis import analyze_ecg_from_file # Import our new analysis function
+from flask import Flask, render_template, request, jsonify
+import wfdb
+import numpy as np
+from scipy.signal import butter, filtfilt
 
-# Initialize the Flask application
 app = Flask(__name__)
 
-# Configuration for file uploads
-UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# Create the uploads directory if it doesn't exist
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+def preprocess_signal(signal, fs):
+    nyquist = 0.5 * fs
+    low = 0.5 / nyquist
+    high = 40.0 / nyquist
+    b, a = butter(1, [low, high], btype='band')
+    return filtfilt(b, a, signal)
 
-# Define the route for the home page (your main HTML page)
-@app.route('/')
-def home():
-    return render_template('index.html')
+def detect_r_peaks(signal, fs):
+    threshold = 0.6 * np.max(signal)
+    r_peaks = np.where(signal > threshold)[0]
+    if r_peaks.size > 0:
+        r_peaks_diff = np.diff(r_peaks)
+        r_peaks = r_peaks[np.concatenate(([True], r_peaks_diff > fs / 10))]
+    return r_peaks
 
-# Define the route that handles the file upload and analysis
-@app.route('/analyze', methods=['POST'])
+def calculate_heart_rate(r_peaks, fs):
+    if len(r_peaks) < 2:
+        return 0
+    rr_intervals = np.diff(r_peaks) / fs
+    mean_rr = np.mean(rr_intervals)
+    return 60 / mean_rr
+
+def classify_arrhythmia(heart_rate):
+    if heart_rate == 0:
+        return "Undetermined"
+    if heart_rate < 60:
+        return "Bradycardia"
+    elif heart_rate > 100:
+        return "Tachycardia"
+    else:
+        return "Normal Sinus Rhythm"
+
+@app.route("/analyze", methods=["POST"])
 def analyze():
-    if 'ecg_file' not in request.files:
-        return "Error: No file part in the request.", 400
-    
-    file = request.files['ecg_file']
+    file = request.files["ecg_file"]
+    record_name = file.filename.split(".")[0]
+    try:
+        # You can replace this part with reading the uploaded file
+        record = wfdb.rdrecord(record_name, pn_dir="mitdb", sampto=15000)
+        signal = record.p_signal[:, 0]
+        fs = record.fs
 
-    if file.filename == '':
-        return "Error: No file selected for uploading.", 400
+        filtered_signal = preprocess_signal(signal, fs)
+        r_peaks = detect_r_peaks(filtered_signal, fs)
+        heart_rate = calculate_heart_rate(r_peaks, fs)
+        arrhythmia = classify_arrhythmia(heart_rate)
 
-    if file:
-        # Secure the filename to prevent security issues
-        filename = secure_filename(file.filename)
-        # Save the uploaded file to the 'uploads' folder
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
+        return jsonify({
+            "heart_rate": round(heart_rate, 2),
+            "arrhythmia": arrhythmia
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
-        # --- THIS IS WHERE YOUR PYTHON CODE RUNS ---
-        # Call the analysis function with the path to the uploaded file
-        # We assume a default sampling frequency of 360 Hz for MIT-BIH data
-        fs = 360 
-        results = analyze_ecg_from_file(filepath, fs)
+@app.route("/")
+def home():
+    return "BeatSense API is running!"
 
-        # If analysis fails, show an error
-        if results is None:
-            return "Error: Could not process the uploaded file. Please ensure it is a valid single-column text or CSV file.", 500
-
-        # Render the results page with the data from your analysis
-        return render_template('results.html', results=results)
-
-# This allows you to run the app by executing "python app.py"
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
