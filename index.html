@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BeatSense | ECG Signal Processing</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="assets/images/beatsense-logo.png"> <!-- favicon -->
   <style>
     body {
       font-family: 'Poppins', sans-serif;
@@ -17,6 +18,14 @@
       color: white;
       text-align: center;
       padding: 60px 20px;
+    }
+    header img.logo {
+      display: block;
+      margin: 0 auto 20px auto;
+      max-width: 140px;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
     header h1 {
       font-size: 2.8em;
@@ -41,7 +50,7 @@
       color: #333;
       margin-top: 25px;
     }
-    ul {
+    ul, ol {
       line-height: 1.8;
     }
     footer {
@@ -67,11 +76,27 @@
       color: #ff4b2b;
       text-decoration: none;
     }
+    a:hover {
+      text-decoration: underline;
+    }
+    @media (max-width: 768px) {
+      section {
+        padding: 30px 8%;
+      }
+      header h1 {
+        font-size: 2em;
+      }
+      header img.logo {
+        max-width: 100px;
+      }
+    }
   </style>
 </head>
 <body>
 
   <header>
+    <!-- 👇 Add your logo here (place logo file inside assets/images/) -->
+    <img src="assets/images/beatsense-logo.png" alt="BeatSense Logo" class="logo">
     <h1>BeatSense</h1>
     <p>ECG Signal Processing for Arrhythmia Detection Using Python</p>
   </header>
@@ -155,6 +180,7 @@
   </section>
 
   <footer>
+    <img src="assets/images/beatsense-logo.png" alt="BeatSense Logo" class="logo" style="max-width: 80px;">
     <p>© 2025 BeatSense | ECG Signal Processing for Arrhythmia Detection</p>
   </footer>
 
