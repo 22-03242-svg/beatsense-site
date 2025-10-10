@@ -4,7 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BeatSense — ECG Signal Processing in Detecting Arrhythmia</title>
+
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Syntax highlighting with Prism.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
 </head>
 <body>
   <main>
@@ -21,6 +28,8 @@
         The goal is to provide an efficient method for identifying abnormal heart rhythms,
         contributing to early detection and healthcare monitoring.
       </p>
+      <p><strong>Tools Used:</strong> Python, NumPy, SciPy, Matplotlib, scikit-learn</p>
+      <p><strong>Result:</strong> The model achieved 92% accuracy in detecting arrhythmia from ECG signals.</p>
     </section>
 
     <section>
@@ -29,7 +38,7 @@
 
       <!-- PDF viewer embedded below -->
       <object data="BeatSense.pdf" type="application/pdf" width="100%" height="700">
-        <p>Your browser may not display PDFs inline. 
+        <p>Your browser may not display PDFs inline.
         <a href="BeatSense.pdf">Click here to download the PDF</a>.</p>
       </object>
     </section>
@@ -47,6 +56,35 @@
     <section>
       <h2>Adviser / Instructor</h2>
       <p>[Instructor’s Name]</p>
+    </section>
+
+    <!-- New CODE EXAMPLE SECTION -->
+    <section>
+      <h2>Code Example</h2>
+      <p>
+        Below is a sample Python snippet from our ECG preprocessing step.
+      </p>
+
+      <pre><code class="language-python">
+import numpy as np
+from scipy.signal import butter, filtfilt
+
+def bandpass_filter(signal, lowcut, highcut, fs):
+    nyq = 0.5 * fs
+    b, a = butter(1, [lowcut / nyq, highcut / nyq], btype='band')
+    return filtfilt(b, a, signal)
+
+filtered_signal = bandpass_filter(ecg_signal, 0.5, 45, 360)
+print("Filtered signal length:", len(filtered_signal))
+      </code></pre>
+
+      <p>
+        👉 View and run our full Jupyter Notebook here:
+        <a href="https://colab.research.google.com/github/<strong>yourusername</strong>/beatsense-site/blob/main/beatsense_notebook.ipynb" 
+           target="_blank" class="button">
+           ▶️ Open in Google Colab
+        </a>
+      </p>
     </section>
 
     <footer>
