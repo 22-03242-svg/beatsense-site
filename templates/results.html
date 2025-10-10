@@ -49,7 +49,7 @@
 
                 <div class="max-w-5xl mx-auto bg-white rounded-lg shadow-lg p-8">
                     <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">ECG Signal Visualization</h3>
-                    <img src="{{ url_for('static', filename=results.plot_path.replace('static/', '')) }}?v={{ range(1,10000)|random }}" 
+                   <img src="{{ url_for('static', filename='images/analysis_plot.png') }}?v={{ range(1,10000)|random }}"
                          alt="ECG Analysis Plot" class="rounded-md border border-gray-200">
                 </div>
 
