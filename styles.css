@@ -95,8 +95,25 @@ footer {
     height: 500px;
   }
 }
+
 .logo {
   display: block;
   margin: 0 auto 20px auto;
   max-width: 120px;
+}
+
+.download-btn {
+  display: inline-block;
+  background: #0077cc;
+  color: white;
+  padding: 12px 20px;
+  margin-top: 20px;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+
+.download-btn:hover {
+  background: #3399ff;
 }
