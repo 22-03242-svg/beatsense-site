@@ -1,106 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BeatSense | ECG Signal Processing</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" href="assets/images/beatsense-logo.png.png"> <!-- favicon -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="beatsense-logo.png" />
   <style>
+    * {
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: "Poppins", sans-serif;
       margin: 0;
       background-color: #f9f9f9;
       color: #222;
     }
-    header {
-      background: linear-gradient(120deg, #ff416c, #ff4b2b);
-      color: white;
+
+    /* ======= NAVBAR ======= */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 10%;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .nav-logo img {
+      height: 45px;
+      width: auto;
+      border-radius: 8px;
+    }
+
+    .brand-name {
+      font-weight: 600;
+      font-size: 1.2em;
+      color: #ff4b2b;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links li a {
+      color: #222;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links li a:hover {
+      color: #ff4b2b;
+    }
+
+    /* ======= HERO SECTION ======= */
+    .hero {
+      margin-top: 90px;
       text-align: center;
-      padding: 60px 20px;
+      color: white;
+      background: linear-gradient(120deg, #ff416c, #ff4b2b);
+      padding: 80px 20px;
+      border-radius: 0 0 30px 30px;
     }
-    header img.logo {
-      display: block;
-      margin: 0 auto 20px auto;
-      max-width: 140px;
-      height: auto;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-    header h1 {
+
+    .hero h1 {
       font-size: 2.8em;
       margin-bottom: 10px;
     }
-    header p {
+
+    .hero p {
       font-size: 1.2em;
       opacity: 0.9;
     }
+
+    /* ======= SECTIONS ======= */
     section {
       padding: 50px 15%;
       background: white;
       margin: 30px auto;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
+
     h2 {
       color: #ff4b2b;
       margin-bottom: 10px;
     }
+
     h3 {
       color: #333;
       margin-top: 25px;
     }
-    ul, ol {
+
+    ul,
+    ol {
       line-height: 1.8;
     }
-    footer {
-      text-align: center;
-      padding: 20px;
-      background-color: #222;
-      color: #fff;
-      font-size: 0.9em;
-    }
+
+    /* ======= TEAM SECTION ======= */
     .team {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 15px;
     }
+
     .team div {
       background: #ffe9e3;
       padding: 15px 20px;
       border-radius: 8px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
     }
+
+    /* ======= FOOTER ======= */
+    footer {
+      text-align: center;
+      padding: 30px 20px;
+      background-color: #222;
+      color: #fff;
+      font-size: 0.9em;
+    }
+
+    footer img {
+      max-width: 80px;
+      display: block;
+      margin: 0 auto 10px auto;
+    }
+
     a {
       color: #ff4b2b;
       text-decoration: none;
     }
+
     a:hover {
       text-decoration: underline;
     }
+
+    /* ======= RESPONSIVE ======= */
     @media (max-width: 768px) {
+      .nav-links {
+        flex-direction: column;
+        background: white;
+        position: absolute;
+        top: 65px;
+        right: 0;
+        width: 100%;
+        display: none;
+        text-align: center;
+        padding: 10px 0;
+      }
+
+      .nav-links.show {
+        display: flex;
+      }
+
+      .navbar {
+        flex-wrap: wrap;
+      }
+
       section {
         padding: 30px 8%;
       }
-      header h1 {
+
+      .hero h1 {
         font-size: 2em;
       }
-      header img.logo {
-        max-width: 100px;
+
+      .nav-logo img {
+        height: 35px;
       }
     }
   </style>
 </head>
 <body>
 
+  <!-- ======= NAVBAR + HERO ======= -->
   <header>
-    <!-- 👇 Add your logo here (place logo file inside assets/images/) -->
-    <img src="assets/images/beatsense-logo.png.png" alt="BeatSense Logo" class="logo">
-    <h1>BeatSense</h1>
-    <p>ECG Signal Processing for Arrhythmia Detection Using Python</p>
+    <nav class="navbar">
+      <div class="nav-logo" onclick="toggleMenu()">
+        <img src="beatsense-logo.png" alt="BeatSense Logo" />
+        <span class="brand-name">BeatSense</span>
+      </div>
+      <ul class="nav-links" id="navMenu">
+        <li><a href="#about">About</a></li>
+        <li><a href="#objectives">Objectives</a></li>
+        <li><a href="#methodology">Methodology</a></li>
+        <li><a href="#team">Team</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+
+    <div class="hero">
+      <h1>BeatSense</h1>
+      <p>ECG Signal Processing for Arrhythmia Detection Using Python</p>
+    </div>
   </header>
 
+  <!-- ======= CONTENT SECTIONS ======= -->
   <section id="about">
     <h2>About the Project</h2>
     <p><strong>BeatSense</strong> is a Python-based system designed to automatically detect arrhythmias through ECG signal processing and machine learning. It filters noise, identifies R-peaks, and classifies heartbeats as normal, bradycardic, or tachycardic—offering an accessible, cost-effective tool for cardiovascular monitoring.</p>
@@ -180,9 +294,15 @@
   </section>
 
   <footer>
-    <img src="assets/images/beatsense-logo.png.png" alt="BeatSense Logo" class="logo" style="max-width: 80px;">
+    <img src="beatsense-logo.png" alt="BeatSense Logo" />
     <p>© 2025 BeatSense | ECG Signal Processing for Arrhythmia Detection</p>
   </footer>
 
+  <script>
+    // Mobile menu toggle
+    function toggleMenu() {
+      document.getElementById("navMenu").classList.toggle("show");
+    }
+  </script>
 </body>
 </html>
