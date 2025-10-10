@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF--8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BeatSense: Python-Based Arrhythmia Detection</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,17 +14,28 @@
         .hero-bg {
             background-color: #f0f4ff;
         }
+        /* A custom utility class for the section titles, since @apply doesn't work in <style> tags */
         .section-title {
-            @apply text-3xl font-bold text-gray-800 mb-8 text-center;
+            font-size: 1.875rem; /* 3xl */
+            font-weight: 700; /* bold */
+            color: #1f2937; /* gray-800 */
+            margin-bottom: 2rem; /* mb-8 */
+            text-align: center;
         }
         .card {
-            @apply bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300;
+            background-color: white;
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* shadow-lg */
+            padding: 1.5rem; /* p-6 */
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* shadow-xl */
         }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-700">
 
-    <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
             <div class="text-2xl font-bold text-blue-600">
@@ -33,27 +44,25 @@
             <div class="hidden md:flex space-x-8">
                 <a href="#about" class="text-gray-600 hover:text-blue-600">About</a>
                 <a href="#how-it-works" class="text-gray-600 hover:text-blue-600">How It Works</a>
-                <a href="#arrhythmias" class="text-gray-600 hover:text-blue-600">Arrhythmias Detected</a>
+                <a href="#live-demo" class="text-gray-600 hover:text-blue-600">Live Demo</a>
+                <a href="#arrhythmias" class="text-gray-600 hover:text-blue-600">Arrhythmias</a>
                 <a href="#research" class="text-gray-600 hover:text-blue-600">Research</a>
                 <a href="#team" class="text-gray-600 hover:text-blue-600">The Team</a>
-                <a href="#contact" class="text-gray-600 hover:text-blue-600">Contact</a>
             </div>
             <button id="mobile-menu-button" class="md:hidden">
                 <i data-lucide="menu"></i>
             </button>
         </nav>
-        <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
             <a href="#about" class="block py-2 text-gray-600 hover:text-blue-600">About</a>
             <a href="#how-it-works" class="block py-2 text-gray-600 hover:text-blue-600">How It Works</a>
-            <a href="#arrhythmias" class="block py-2 text-gray-600 hover:text-blue-600">Arrhythmias Detected</a>
+            <a href="#live-demo" class="block py-2 text-gray-600 hover:text-blue-600">Live Demo</a>
+            <a href="#arrhythmias" class="block py-2 text-gray-600 hover:text-blue-600">Arrhythmias</a>
             <a href="#research" class="block py-2 text-gray-600 hover:text-blue-600">Research</a>
             <a href="#team" class="block py-2 text-gray-600 hover:text-blue-600">The Team</a>
-            <a href="#contact" class="block py-2 text-gray-600 hover:text-blue-600">Contact</a>
         </div>
     </header>
 
-    <!-- Hero Section -->
     <main>
         <section class="hero-bg" id="about">
             <div class="container mx-auto px-6 py-20 text-center">
@@ -62,16 +71,14 @@
                 <p class="max-w-3xl mx-auto text-gray-700 mb-8">
                     Cardiovascular Diseases (CVDs) are the leading cause of death globally. BeatSense aims to provide a cost-effective, accessible, and non-invasive solution for monitoring cardiovascular health by detecting arrhythmias from ECG signals using advanced signal processing and machine learning techniques.
                 </p>
-                <a href="#how-it-works" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors">Learn More</a>
+                <a href="#live-demo" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors">Try the Live Demo</a>
             </div>
         </section>
 
-        <!-- How It Works Section -->
         <section id="how-it-works" class="py-20">
             <div class="container mx-auto px-6">
                 <h2 class="section-title">How BeatSense Works</h2>
                 <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-8 text-center">
-                    <!-- Step 1 -->
                     <div class="flex flex-col items-center">
                         <div class="bg-blue-100 rounded-full p-4 mb-4">
                             <i data-lucide="database" class="text-blue-600 h-8 w-8"></i>
@@ -79,7 +86,6 @@
                         <h3 class="font-semibold text-lg mb-2">1. Data Acquisition</h3>
                         <p class="text-sm">ECG recordings are collected from the MIT-BIH Arrhythmia Database, a standard resource for arrhythmia research.</p>
                     </div>
-                    <!-- Step 2 -->
                     <div class="flex flex-col items-center">
                         <div class="bg-blue-100 rounded-full p-4 mb-4">
                             <i data-lucide="siren" class="text-blue-600 h-8 w-8"></i>
@@ -87,7 +93,6 @@
                         <h3 class="font-semibold text-lg mb-2">2. Preprocessing</h3>
                         <p class="text-sm">Digital filters are applied to remove noise from the ECG signals and segment them for analysis.</p>
                     </div>
-                    <!-- Step 3 -->
                     <div class="flex flex-col items-center">
                         <div class="bg-blue-100 rounded-full p-4 mb-4">
                            <i data-lucide="activity" class="text-blue-600 h-8 w-8"></i>
@@ -95,7 +100,6 @@
                         <h3 class="font-semibold text-lg mb-2">3. Feature Extraction</h3>
                         <p class="text-sm">Key features like R-peaks and RR intervals are identified to represent the heart's rhythm.</p>
                     </div>
-                    <!-- Step 4 -->
                     <div class="flex flex-col items-center">
                         <div class="bg-blue-100 rounded-full p-4 mb-4">
                             <i data-lucide="brain-circuit" class="text-blue-600 h-8 w-8"></i>
@@ -103,7 +107,6 @@
                         <h3 class="font-semibold text-lg mb-2">4. Classification</h3>
                         <p class="text-sm">Machine learning algorithms classify heartbeats as normal or arrhythmic.</p>
                     </div>
-                    <!-- Step 5 -->
                     <div class="flex flex-col items-center">
                          <div class="bg-blue-100 rounded-full p-4 mb-4">
                             <i data-lucide="bar-chart-2" class="text-blue-600 h-8 w-8"></i>
@@ -118,8 +121,28 @@
             </div>
         </section>
 
-        <!-- Arrhythmias Detected Section -->
-        <section id="arrhythmias" class="py-20 bg-gray-100">
+        <section id="live-demo" class="py-20 bg-gray-100">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title">Live Demo</h2>
+                <p class="text-center max-w-2xl mx-auto mb-12">
+                    Upload an ECG data file from the MIT-BIH database (.dat, .txt, or .csv format) to see BeatSense in action. The system will analyze the signal and provide a classification.
+                </p>
+                <div class="max-w-xl mx-auto">
+                    <form action="/analyze" method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow-lg p-8">
+                        <div class="mb-6">
+                            <label for="ecg_file" class="block text-gray-700 font-medium mb-2">ECG Signal File</label>
+                            <input type="file" id="ecg_file" name="ecg_file" class="w-full text-gray-700 px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors w-full">
+                                Analyze Signal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <section id="arrhythmias" class="py-20">
             <div class="container mx-auto px-6">
                 <h2 class="section-title">Arrhythmias Detected</h2>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -139,18 +162,17 @@
                 <div class="mt-8">
                      <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">Types of Tachycardia</h3>
                      <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-4 text-center">
-                        <div class="bg-white rounded-lg p-4 shadow-md">Superventricular Tachycardia</div>
-                        <div class="bg-white rounded-lg p-4 shadow-md">Ventricular Fibrillation</div>
-                        <div class="bg-white rounded-lg p-4 shadow-md">Ventricular Tachycardia</div>
-                        <div class="bg-white rounded-lg p-4 shadow-md">Atrial Fibrillation</div>
-                        <div class="bg-white rounded-lg p-4 shadow-md">Atrial Flutter</div>
+                         <div class="bg-white rounded-lg p-4 shadow-md">Superventricular Tachycardia</div>
+                         <div class="bg-white rounded-lg p-4 shadow-md">Ventricular Fibrillation</div>
+                         <div class="bg-white rounded-lg p-4 shadow-md">Ventricular Tachycardia</div>
+                         <div class="bg-white rounded-lg p-4 shadow-md">Atrial Fibrillation</div>
+                         <div class="bg-white rounded-lg p-4 shadow-md">Atrial Flutter</div>
                      </div>
                 </div>
             </div>
         </section>
 
-        <!-- Research Section -->
-        <section id="research" class="py-20">
+        <section id="research" class="py-20 bg-gray-100">
             <div class="container mx-auto px-6 text-center">
                 <h2 class="section-title">Our Research</h2>
                 <p class="max-w-3xl mx-auto mb-8">
@@ -162,8 +184,7 @@
             </div>
         </section>
         
-        <!-- Team Section -->
-        <section id="team" class="py-20 bg-gray-100">
+        <section id="team" class="py-20">
             <div class="container mx-auto px-6">
                 <h2 class="section-title">Meet the Team</h2>
                 <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -191,40 +212,8 @@
             </div>
         </section>
 
-        <!-- Contact Section -->
-        <section id="contact" class="py-20">
-            <div class="container mx-auto px-6">
-                <h2 class="section-title">Contact Us</h2>
-                <p class="text-center max-w-2xl mx-auto mb-12">
-                    Have questions or want to collaborate? Reach out to us by filling out the form below.
-                </p>
-                <div class="max-w-xl mx-auto">
-                    <form action="#" method="POST" class="bg-white rounded-lg shadow-lg p-8">
-                        <div class="mb-6">
-                            <label for="name" class="block text-gray-700 font-medium mb-2">Name</label>
-                            <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                        <div class="mb-6">
-                            <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
-                            <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-                        <div class="mb-6">
-                            <label for="message" class="block text-gray-700 font-medium mb-2">Message</label>
-                            <textarea id="message" name="message" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" required></textarea>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors w-full">
-                                Send Message
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
+        </main>
 
-    </main>
-
-    <!-- Footer -->
     <footer class="bg-gray-800 text-white py-8">
         <div class="container mx-auto px-6 text-center">
             <p>&copy; 2025 BeatSense. All Rights Reserved.</p>
