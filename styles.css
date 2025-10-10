@@ -1,0 +1,102 @@
+/* ---------- General page setup ---------- */
+body {
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: #f7f9fb;
+  color: #222;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+/* ---------- Container ---------- */
+main {
+  max-width: 900px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* ---------- Headers ---------- */
+h1, h2 {
+  color: #0d1b2a;
+  line-height: 1.3;
+}
+
+h1 {
+  font-size: 2.4rem;
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 30px;
+}
+
+h2 {
+  margin-top: 40px;
+  border-left: 5px solid #0077cc;
+  padding-left: 10px;
+}
+
+/* ---------- Links ---------- */
+a {
+  color: #0077cc;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Lists ---------- */
+ul.team-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+ul.team-list li {
+  margin-bottom: 8px;
+}
+
+/* ---------- PDF embed ---------- */
+object {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+/* ---------- Footer ---------- */
+footer {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 50px;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
+/* ---------- Mobile responsiveness ---------- */
+@media (max-width: 600px) {
+  main {
+    padding: 20px;
+    margin: 20px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  object {
+    height: 500px;
+  }
+}
+.logo {
+  display: block;
+  margin: 0 auto 20px auto;
+  max-width: 120px;
+}
