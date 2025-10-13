@@ -1,27 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>BeatSense ECG Analyzer</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>BeatSense ECG Analyzer</h1>
-    <p>Upload your ECG file to begin analysis.</p>
-
-    <form action="/analyze" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".csv,.dat,.hea" required>
-        <button type="submit">Upload & Analyze</button>
+    <h1>Upload an ECG File</h1>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv">
+        <input type="submit" value="Upload & Analyze">
     </form>
 
-    {% if result %}
-        <h2>Analysis Result</h2>
-        <p>{{ result|safe }}</p>
-    {% endif %}
-
-    {% if plot_url %}
-        <h2>ECG Plot</h2>
-        <img src="{{ plot_url }}" alt="ECG Plot" style="max-width:90%;">
+    {% if image %}
+        <h2>ECG Signal Plot:</h2>
+        <img src="data:image/png;base64,{{ image }}" alt="ECG Plot">
     {% endif %}
 </body>
 </html>
