@@ -2,243 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BeatSense: Python-Based Arrhythmia Detection</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .hero-bg {
-            background-color: #f0f4ff;
-        }
-        /* A custom utility class for the section titles, since @apply doesn't work in <style> tags */
-        .section-title {
-            font-size: 1.875rem; /* 3xl */
-            font-weight: 700; /* bold */
-            color: #1f2937; /* gray-800 */
-            margin-bottom: 2rem; /* mb-8 */
-            text-align: center;
-        }
-        .card {
-            background-color: white;
-            border-radius: 0.5rem; /* rounded-lg */
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* shadow-lg */
-            padding: 1.5rem; /* p-6 */
-            transition: box-shadow 0.3s ease-in-out;
-        }
-        .card:hover {
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* shadow-xl */
-        }
-    </style>
+    <title>BeatSense ECG Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body class="bg-gray-50 text-gray-700">
+<body>
+    <h1>BeatSense ECG Analyzer</h1>
+    <p>Upload your ECG file to begin analysis.</p>
 
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-bold text-blue-600">
-                BeatSense
-            </div>
-            <div class="hidden md:flex space-x-8">
-                <a href="#about" class="text-gray-600 hover:text-blue-600">About</a>
-                <a href="#how-it-works" class="text-gray-600 hover:text-blue-600">How It Works</a>
-                <a href="#live-demo" class="text-gray-600 hover:text-blue-600">Live Demo</a>
-                <a href="#arrhythmias" class="text-gray-600 hover:text-blue-600">Arrhythmias</a>
-                <a href="#research" class="text-gray-600 hover:text-blue-600">Research</a>
-                <a href="#team" class="text-gray-600 hover:text-blue-600">The Team</a>
-            </div>
-            <button id="mobile-menu-button" class="md:hidden">
-                <i data-lucide="menu"></i>
-            </button>
-        </nav>
-        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
-            <a href="#about" class="block py-2 text-gray-600 hover:text-blue-600">About</a>
-            <a href="#how-it-works" class="block py-2 text-gray-600 hover:text-blue-600">How It Works</a>
-            <a href="#live-demo" class="block py-2 text-gray-600 hover:text-blue-600">Live Demo</a>
-            <a href="#arrhythmias" class="block py-2 text-gray-600 hover:text-blue-600">Arrhythmias</a>
-            <a href="#research" class="block py-2 text-gray-600 hover:text-blue-600">Research</a>
-            <a href="#team" class="block py-2 text-gray-600 hover:text-blue-600">The Team</a>
-        </div>
-    </header>
+    <form action="/analyze" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv,.dat,.hea" required>
+        <button type="submit">Upload & Analyze</button>
+    </form>
 
-    <main>
-        <section class="hero-bg" id="about">
-            <div class="container mx-auto px-6 py-20 text-center">
-                <h1 class="text-5xl font-bold text-gray-800 mb-4">Welcome to BeatSense</h1>
-                <p class="text-xl text-gray-600 mb-8">A Python-Based Arrhythmia Detection System Through Signal Processing</p>
-                <p class="max-w-3xl mx-auto text-gray-700 mb-8">
-                    Cardiovascular Diseases (CVDs) are the leading cause of death globally. BeatSense aims to provide a cost-effective, accessible, and non-invasive solution for monitoring cardiovascular health by detecting arrhythmias from ECG signals using advanced signal processing and machine learning techniques.
-                </p>
-                <a href="#live-demo" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors">Try the Live Demo</a>
-            </div>
-        </section>
+    {% if result %}
+        <h2>Analysis Result</h2>
+        <p>{{ result|safe }}</p>
+    {% endif %}
 
-        <section id="how-it-works" class="py-20">
-            <div class="container mx-auto px-6">
-                <h2 class="section-title">How BeatSense Works</h2>
-                <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-8 text-center">
-                    <div class="flex flex-col items-center">
-                        <div class="bg-blue-100 rounded-full p-4 mb-4">
-                            <i data-lucide="database" class="text-blue-600 h-8 w-8"></i>
-                        </div>
-                        <h3 class="font-semibold text-lg mb-2">1. Data Acquisition</h3>
-                        <p class="text-sm">ECG recordings are collected from the MIT-BIH Arrhythmia Database, a standard resource for arrhythmia research.</p>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <div class="bg-blue-100 rounded-full p-4 mb-4">
-                            <i data-lucide="siren" class="text-blue-600 h-8 w-8"></i>
-                        </div>
-                        <h3 class="font-semibold text-lg mb-2">2. Preprocessing</h3>
-                        <p class="text-sm">Digital filters are applied to remove noise from the ECG signals and segment them for analysis.</p>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <div class="bg-blue-100 rounded-full p-4 mb-4">
-                           <i data-lucide="activity" class="text-blue-600 h-8 w-8"></i>
-                        </div>
-                        <h3 class="font-semibold text-lg mb-2">3. Feature Extraction</h3>
-                        <p class="text-sm">Key features like R-peaks and RR intervals are identified to represent the heart's rhythm.</p>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <div class="bg-blue-100 rounded-full p-4 mb-4">
-                            <i data-lucide="brain-circuit" class="text-blue-600 h-8 w-8"></i>
-                        </div>
-                        <h3 class="font-semibold text-lg mb-2">4. Classification</h3>
-                        <p class="text-sm">Machine learning algorithms classify heartbeats as normal or arrhythmic.</p>
-                    </div>
-                    <div class="flex flex-col items-center">
-                         <div class="bg-blue-100 rounded-full p-4 mb-4">
-                            <i data-lucide="bar-chart-2" class="text-blue-600 h-8 w-8"></i>
-                        </div>
-                        <h3 class="font-semibold text-lg mb-2">5. Analysis & Output</h3>
-                        <p class="text-sm">The system provides an output, categorizing the ECG sample and providing recommendations.</p>
-                    </div>
-                </div>
-                <div class="mt-16 flex justify-center">
-                     <img src="https://i.imgur.com/B9B2e8V.png" alt="BeatSense Research Framework" class="rounded-lg shadow-lg max-w-full h-auto md:max-w-3xl">
-                </div>
-            </div>
-        </section>
-
-        <section id="live-demo" class="py-20 bg-gray-100">
-            <div class="container mx-auto px-6">
-                <h2 class="section-title">Live Demo</h2>
-                <p class="text-center max-w-2xl mx-auto mb-12">
-                    Upload an ECG data file from the MIT-BIH database (.dat, .txt, or .csv format) to see BeatSense in action. The system will analyze the signal and provide a classification.
-                </p>
-                <div class="max-w-xl mx-auto">
-                    <form action="/analyze" method="POST" enctype="multipart/form-data" class="bg-white rounded-lg shadow-lg p-8">
-                        <div class="mb-6">
-                            <label for="ecg_file" class="block text-gray-700 font-medium mb-2">ECG Signal File</label>
-                            <input type="file" id="ecg_file" name="ecg_file" class="w-full text-gray-700 px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors w-full">
-                                Analyze Signal
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-        <section id="arrhythmias" class="py-20">
-            <div class="container mx-auto px-6">
-                <h2 class="section-title">Arrhythmias Detected</h2>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div class="card">
-                        <h3 class="text-xl font-semibold mb-2 text-blue-600">Normal Sinus Rhythm</h3>
-                        <p>This is the normal, healthy heart rhythm, typically between 60 and 100 beats per minute.</p>
-                    </div>
-                    <div class="card">
-                        <h3 class="text-xl font-semibold mb-2 text-red-600">Bradycardia</h3>
-                        <p>A heart rate that's too slow, typically below 60 beats per minute. BeatSense identifies this condition for further analysis.</p>
-                    </div>
-                    <div class="card">
-                        <h3 class="text-xl font-semibold mb-2 text-red-600">Tachycardia</h3>
-                        <p>A heart rate that's too fast, typically above 100 beats per minute. BeatSense can further classify Tachycardia into several subtypes.</p>
-                    </div>
-                </div>
-                <div class="mt-8">
-                     <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">Types of Tachycardia</h3>
-                     <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-4 text-center">
-                         <div class="bg-white rounded-lg p-4 shadow-md">Superventricular Tachycardia</div>
-                         <div class="bg-white rounded-lg p-4 shadow-md">Ventricular Fibrillation</div>
-                         <div class="bg-white rounded-lg p-4 shadow-md">Ventricular Tachycardia</div>
-                         <div class="bg-white rounded-lg p-4 shadow-md">Atrial Fibrillation</div>
-                         <div class="bg-white rounded-lg p-4 shadow-md">Atrial Flutter</div>
-                     </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="research" class="py-20 bg-gray-100">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="section-title">Our Research</h2>
-                <p class="max-w-3xl mx-auto mb-8">
-                    Our work is based on the paper "BeatSense: Python-Based Arrhythmia Detection Through Signal Processing." This research outlines the development and validation of our system.
-                </p>
-                <a href="#" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors" onclick="alert('The full research paper would be linked here.'); return false;">
-                    Read The Full Paper (PDF)
-                </a>
-            </div>
-        </section>
-        
-        <section id="team" class="py-20">
-            <div class="container mx-auto px-6">
-                <h2 class="section-title">Meet the Team</h2>
-                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div class="card text-center">
-                        <img src="https://placehold.co/128x128/EBF4FF/76A9FA?text=SE" class="rounded-full w-32 h-32 mx-auto mb-4" alt="Shena Marie Espelita">
-                        <h4 class="text-lg font-semibold">Shena Marie Espelita</h4>
-                    </div>
-                    <div class="card text-center">
-                         <img src="https://placehold.co/128x128/EBF4FF/76A9FA?text=JA" class="rounded-full w-32 h-32 mx-auto mb-4" alt="Jashley Mae Alcances">
-                        <h4 class="text-lg font-semibold">Jashley Mae Alcances</h4>
-                    </div>
-                    <div class="card text-center">
-                         <img src="https://placehold.co/128x128/EBF4FF/76A9FA?text=YB" class="rounded-full w-32 h-32 mx-auto mb-4" alt="Ylona Leigh Balahadia">
-                        <h4 class="text-lg font-semibold">Ylona Leigh Balahadia</h4>
-                    </div>
-                    <div class="card text-center">
-                         <img src="https://placehold.co/128x128/EBF4FF/76A9FA?text=MR" class="rounded-full w-32 h-32 mx-auto mb-4" alt="Mhekyla D. Ramirez">
-                        <h4 class="text-lg font-semibold">Mhekyla D. Ramirez</h4>
-                    </div>
-                </div>
-                 <div class="text-center mt-12">
-                    <h3 class="text-xl font-semibold text-gray-800">Advisor</h3>
-                    <p class="text-gray-600 mt-2">Dr. Abid Yaya</p>
-                </div>
-            </div>
-        </section>
-
-        </main>
-
-    <footer class="bg-gray-800 text-white py-8">
-        <div class="container mx-auto px-6 text-center">
-            <p>&copy; 2025 BeatSense. All Rights Reserved.</p>
-            <p class="text-sm text-gray-400 mt-2">This website is for informational purposes only and is not intended for clinical diagnosis.</p>
-        </div>
-    </footer>
-
-    <script>
-        lucide.createIcons();
-        
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-
-        // Close mobile menu when a link is clicked
-        const mobileMenuLinks = mobileMenu.getElementsByTagName('a');
-        for (let link of mobileMenuLinks) {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
-            });
-        }
-    </script>
-
+    {% if plot_url %}
+        <h2>ECG Plot</h2>
+        <img src="{{ plot_url }}" alt="ECG Plot" style="max-width:90%;">
+    {% endif %}
 </body>
 </html>
