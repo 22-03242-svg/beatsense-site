@@ -1,67 +1,60 @@
-from flask import Flask, render_template, request, jsonify
-import wfdb
+from flask import Flask, render_template, request
+import os
 import numpy as np
-from scipy.signal import butter, filtfilt
+import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
 
 app = Flask(__name__)
 
-def preprocess_signal(signal, fs):
-    nyquist = 0.5 * fs
-    low = 0.5 / nyquist
-    high = 40.0 / nyquist
-    b, a = butter(1, [low, high], btype='band')
-    return filtfilt(b, a, signal)
+# Home page
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-def detect_r_peaks(signal, fs):
-    threshold = 0.6 * np.max(signal)
-    r_peaks = np.where(signal > threshold)[0]
-    if r_peaks.size > 0:
-        r_peaks_diff = np.diff(r_peaks)
-        r_peaks = r_peaks[np.concatenate(([True], r_peaks_diff > fs / 10))]
-    return r_peaks
-
-def calculate_heart_rate(r_peaks, fs):
-    if len(r_peaks) < 2:
-        return 0
-    rr_intervals = np.diff(r_peaks) / fs
-    mean_rr = np.mean(rr_intervals)
-    return 60 / mean_rr
-
-def classify_arrhythmia(heart_rate):
-    if heart_rate == 0:
-        return "Undetermined"
-    if heart_rate < 60:
-        return "Bradycardia"
-    elif heart_rate > 100:
-        return "Tachycardia"
-    else:
-        return "Normal Sinus Rhythm"
-
-@app.route("/analyze", methods=["POST"])
+# File upload and analysis route
+@app.route('/analyze', methods=['POST'])
 def analyze():
-    file = request.files["ecg_file"]
-    record_name = file.filename.split(".")[0]
+    file = request.files['file']
+    if not file:
+        return render_template('index.html', result="No file uploaded.")
+
     try:
-        # You can replace this part with reading the uploaded file
-        record = wfdb.rdrecord(record_name, pn_dir="mitdb", sampto=15000)
-        signal = record.p_signal[:, 0]
-        fs = record.fs
-
-        filtered_signal = preprocess_signal(signal, fs)
-        r_peaks = detect_r_peaks(filtered_signal, fs)
-        heart_rate = calculate_heart_rate(r_peaks, fs)
-        arrhythmia = classify_arrhythmia(heart_rate)
-
-        return jsonify({
-            "heart_rate": round(heart_rate, 2),
-            "arrhythmia": arrhythmia
-        })
+        # Try to read the uploaded file as CSV
+        data = np.loadtxt(file, delimiter=',')
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return render_template('index.html', result=f"Error reading file: {str(e)}")
 
-@app.route("/")
-def home():
-    return "BeatSense API is running!"
+    # --- Basic ECG analysis example ---
+    mean_val = np.mean(data)
+    std_val = np.std(data)
+    max_val = np.max(data)
+    min_val = np.min(data)
 
-if __name__ == "__main__":
+    result_text = (
+        f"Mean amplitude: {mean_val:.3f}<br>"
+        f"Standard deviation: {std_val:.3f}<br>"
+        f"Max value: {max_val:.3f}<br>"
+        f"Min value: {min_val:.3f}"
+    )
+
+    # --- Generate ECG plot ---
+    plt.figure(figsize=(8, 3))
+    plt.plot(data[:1000])  # Show first 1000 samples for readability
+    plt.title("ECG Signal")
+    plt.xlabel("Sample")
+    plt.ylabel("Amplitude")
+    plt.tight_layout()
+
+    # Convert plot to base64 for embedding in HTML
+    img = BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plot_url = 'data:image/png;base64,' + base64.b64encode(img.getvalue()).decode()
+    plt.close()
+
+    return render_template('index.html', result=result_text, plot_url=plot_url)
+
+# Run the app
+if __name__ == '__main__':
     app.run(debug=True)
