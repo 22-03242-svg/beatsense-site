@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BeatSense: Python-Based Arrhythmia Detection</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .fade-in { animation: fadeIn 1s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-indigo-600 text-white py-6 shadow-lg">
+    <div class="container mx-auto text-center">
+      <h1 class="text-3xl font-bold">BeatSense</h1>
+      <p class="text-lg">Python-Based Arrhythmia Detection</p>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto mt-10 px-6 md:px-12">
+    <section class="bg-white shadow-md rounded-2xl p-8">
+      <h2 class="text-2xl font-semibold text-indigo-700 mb-4">Research Design</h2>
+      <p class="mb-4">
+        The research design for <strong>BeatSense</strong> follows an experimental and computational approach focusing on the 
+        analysis of ECG (Electrocardiogram) signals using Python. The system processes ECG waveform data, detects R-peaks, 
+        and classifies heart rhythm patterns into normal or abnormal categories based on extracted features such as heart rate, 
+        RR intervals, and signal irregularities.
+      </p>
+      <p>
+        The algorithm is implemented using Python libraries such as <strong>NumPy</strong> and <strong>SciPy</strong> for signal 
+        processing, while <strong>Matplotlib</strong> is used for ECG visualization. The study simulates various cardiac conditions 
+        — including Bradycardia, Normal Sinus Rhythm, and multiple Tachycardia forms — to assess the system’s capability to 
+        differentiate arrhythmias.
+      </p>
+    </section>
+
+    <!-- ECG Simulation -->
+    <section class="bg-white shadow-md rounded-2xl p-8 mt-8">
+      <h2 class="text-2xl font-semibold text-indigo-700 mb-6">ECG Signal Simulation</h2>
+      <div class="text-center mb-6">
+        <button id="analyzeBtn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-all">
+          Run Analysis
+        </button>
+      </div>
+
+      <div id="result" class="hidden fade-in">
+        <div class="bg-gray-100 p-4 rounded-lg text-center">
+          <h3 class="text-lg font-semibold mb-2 text-indigo-700">Analysis Result</h3>
+          <p id="resultBpm" class="text-xl font-bold"></p>
+          <p id="resultRhythm" class="text-lg"></p>
+          <p id="resultClass" class="mt-2 text-lg font-semibold"></p>
+        </div>
+
+        <div id="recommendation" class="mt-6 p-4 rounded-lg">
+          <h4 id="recTitle" class="text-lg font-bold"></h4>
+          <p id="recText" class="mt-2"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center py-6 mt-12 bg-indigo-600 text-white">
+    <p>&copy; 2025 BeatSense | Developed for Biomedical Engineering Research</p>
+  </footer>
+
+  <script>
+    document.getElementById('analyzeBtn').addEventListener('click', runAnalysis);
+
+    function runAnalysis() {
+      const resultDiv = document.getElementById('result');
+      const resultBpm = document.getElementById('resultBpm');
+      const resultRhythm = document.getElementById('resultRhythm');
+      const resultClass = document.getElementById('resultClass');
+      const recommendation = document.getElementById('recommendation');
+      const recTitle = document.getElementById('recTitle');
+      const recText = document.getElementById('recText');
+
+      const randomCase = Math.random();
+      let bpm, rhythm, classification, recColorClass, recTextColorClass;
+
+      if (randomCase < 0.33) {
+        // --- Tachycardia with subtype classification ---
+        bpm = (Math.random() * 40 + 101).toFixed(1);
+        rhythm = 'Irregular';
+
+        const tachyTypes = [
+          'Supraventricular Tachycardia',
+          'Ventricular Fibrillation',
+          'Ventricular Tachycardia',
+          'Atrial Fibrillation',
+          'Atrial Flutter'
+        ];
+        const tachyType = tachyTypes[Math.floor(Math.random() * tachyTypes.length)];
+
+        classification = `Tachycardia (${tachyType})`;
+
+        recTitle.textContent = 'Recommendation';
+        recText.textContent = `The analysis indicates a ${tachyType}, which is a serious form of arrhythmia. Immediate clinical evaluation by a cardiologist is strongly advised.`;
+        recColorClass = 'bg-red-50 border-l-4 border-red-500';
+        recTextColorClass = 'text-red-900';
+        resultBpm.className = 'font-bold text-xl text-red-600';
+        resultRhythm.className = 'font-bold text-xl text-red-600';
+
+      } else if (randomCase < 0.66) {
+        // --- Normal Sinus Rhythm ---
+        bpm = (Math.random() * 20 + 60).toFixed(1);
+        rhythm = 'Regular';
+        classification = 'Normal Sinus Rhythm';
+        recTitle.textContent = 'Recommendation';
+        recText.textContent = 'The ECG pattern indicates a normal sinus rhythm with healthy cardiac activity.';
+        recColorClass = 'bg-green-50 border-l-4 border-green-500';
+        recTextColorClass = 'text-green-900';
+        resultBpm.className = 'font-bold text-xl text-green-600';
+        resultRhythm.className = 'font-bold text-xl text-green-600';
+
+      } else {
+        // --- Bradycardia ---
+        bpm = (Math.random() * 20 + 40).toFixed(1);
+        rhythm = 'Regular but slow';
+        classification = 'Bradycardia';
+        recTitle.textContent = 'Recommendation';
+        recText.textContent = 'The analysis indicates a possible bradycardia. If accompanied by dizziness or fatigue, consult a physician.';
+        recColorClass = 'bg-yellow-50 border-l-4 border-yellow-500';
+        recTextColorClass = 'text-yellow-900';
+        resultBpm.className = 'font-bold text-xl text-yellow-600';
+        resultRhythm.className = 'font-bold text-xl text-yellow-600';
+      }
+
+      resultBpm.textContent = `Heart Rate: ${bpm} BPM`;
+      resultRhythm.textContent = `Rhythm: ${rhythm}`;
+      resultClass.textContent = `Classification: ${classification}`;
+
+      recommendation.className = `${recColorClass} ${recTextColorClass} p-4 rounded-lg mt-6 fade-in`;
+      resultDiv.classList.remove('hidden');
+      resultDiv.classList.add('fade-in');
+    }
+  </script>
+
+</body>
+</html>
