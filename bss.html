@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BeatSense: Python-Based Arrhythmia Detection</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for plotting ECG -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        :root{
+            --blue-600: #2563eb;
+            --blue-700: #1e40af;
+            --muted: #f1f5f9;
+            --glass: rgba(255,255,255,0.65);
+        }
+
+        html,body { height: 100%; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f0f5ff 100%);
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
+            color: #0f172a;
+        }
+
+        /* Container */
+        .wizard {
+            transition: box-shadow .2s ease, transform .1s ease;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:0.75rem 1.25rem;
+            border-radius:0.75rem;
+            font-weight:600;
+            color:white;
+            background: linear-gradient(180deg, var(--blue-600), var(--blue-700));
+            border: 0;
+            box-shadow: 0 6px 18px rgba(37,99,235,0.12);
+            transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+        }
+        .btn-primary:active { transform: translateY(1px) scale(.998); }
+        .btn-primary:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
+
+        .btn-secondary {
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:0.65rem 1rem;
+            border-radius:0.65rem;
+            font-weight:600;
+            color:#0f172a;
+            background: white;
+            border:1px solid #e6edf8;
+            transition: transform .12s ease, box-shadow .12s ease, background-color .12s;
+        }
+        .btn-secondary:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(15,23,42,0.06); }
+
+        /* Feature card */
+        .feature-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,252,255,0.95));
+            border: 1px solid #e6eefb;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:.5rem;
+            transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+            cursor: pointer;
+        }
+        .feature-card:hover {
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 15px 30px rgba(16,24,40,0.06);
+            border-color: rgba(37,99,235,0.25);
+        }
+
+        /* Hero */
+        .hero-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 40%, #2563eb 100%);
+        }
+        .ecg-line-animated {
+            stroke-dasharray: 2000;
+            stroke-dashoffset: 2000;
+            animation: draw-line 4s ease-out forwards;
+        }
+        @keyframes draw-line {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* File input */
+        input[type="file"]::-webkit-file-upload-button,
+        input[type="file"]::file-selector-button {
+            padding: 0.5rem 0.75rem;
+            margin-right: .5rem;
+            border-radius: 0.5rem;
+            font-weight:600;
+            color: var(--blue-600);
+            background: rgba(59,130,246,0.06);
+            border: 1px solid rgba(59,130,246,0.12);
+            cursor: pointer;
+            transition: background-color .12s ease, transform .08s ease;
+        }
+        input[type="file"]::-webkit-file-upload-button:hover,
+        input[type="file"]::file-selector-button:hover {
+            background: rgba(59,130,246,0.12);
+            transform: translateY(-1px);
+        }
+
+        /* Progress bar */
+        .progress-shell {
+            height: 8px;
+            background: linear-gradient(180deg, #f1f5f9, #e9f0ff);
+            border-radius: 999px;
+            overflow: hidden;
+            width: 60%;
+            max-width: 480px;
+            margin: 8px auto 0;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .progress-fill {
+            height:100%;
+            width:0%;
+            background: linear-gradient(90deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06)), linear-gradient(90deg, var(--blue-600), var(--blue-700));
+            transition: width .36s cubic-bezier(.2,.9,.3,1);
+        }
+
+        /* Recommendation panel colors are applied dynamically via JS */
+        .shadow { box-shadow: 0 6px 18px rgba(2,6,23,0.06); }
+
+        /* Small screens hero min height */
+        @media (max-width: 640px) {
+            .hero-headline { font-size: 2rem; }
+            .progress-shell { width: 80%; }
+        }
+
+        /* Focus outlines for accessibility */
+        :focus { outline: 3px solid rgba(37,99,235,0.12); outline-offset: 2px; border-radius: 6px; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main Wizard Container -->
+    <div class="w-full max-w-6xl bg-white rounded-2xl shadow-2xl overflow-hidden wizard border border-gray-100">
+
+        <!-- Header -->
+        <div class="p-5 bg-gray-50 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <img src="https://i.imgur.com/HQWhsJ1.png" alt="BeatSense Logo" class="w-10 h-10 object-contain">
+                    <div>
+                        <h1 class="text-2xl font-bold text-blue-800">BeatSense</h1>
+                        <p class="text-sm text-gray-600">Python-based ECG arrhythmia visualization & learning</p>
+                    </div>
+                </div>
+
+                <div class="text-right">
+                    <div id="progress-indicator" class="text-sm font-medium text-blue-700">Step 1 of 8: Welcome</div>
+                    <div class="progress-shell" role="progressbar" aria-valuemin="1" aria-valuemax="8" aria-valuenow="1" aria-label="Wizard progress">
+                        <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div id="main-content-area" class="flex-grow p-6 md:p-10">
+
+            <!-- SECTION 1: Welcome (Hero) -->
+            <section id="section-1" class="wizard-section active flex-col justify-center items-center text-center">
+                <div class="relative w-full h-full rounded-lg overflow-hidden flex items-center justify-center" style="min-height: 70vh;">
+                    <div class="absolute inset-0 hero-gradient"></div>
+
+                    <svg class="absolute inset-0 w-full h-full opacity-30" width="1200" height="360" viewBox="0 0 1200 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                        <defs>
+                            <pattern id="grid-minor" width="12" height="12" patternUnits="userSpaceOnUse">
+                                <path d="M 12 0 L 0 0 0 12" fill="none" stroke="#ffffff" stroke-width="0.12"/>
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#grid-minor)" />
+                        <path class="ecg-line-animated" fill="none" stroke="#ffffff" stroke-width="2"
+                            d="M0,180 C50,180 60,180 70,180 L78,165 C86,140 98,80 110,160 S122,260 134,180 L142,164 C150,140 162,180 174,180 L300,180 C312,180 320,164 330,130 C348,80 360,160 372,260 S384,180 396,180 L404,165 C412,140 426,180 438,180 L560,180 C572,180 580,165 590,130 C610,80 624,160 640,260 S660,180 672,180 L680,165 C688,140 702,180 716,180 L880,180"/>
+                    </svg>
+
+                    <div class="relative z-10 px-6 py-10 text-center max-w-3xl">
+                        <h2 class="hero-headline text-5xl md:text-6xl font-extrabold text-white leading-tight">Welcome to BeatSense</h2>
+                        <p class="mt-4 text-lg md:text-xl text-white/90 font-medium">Your learning-focused solution for ECG arrhythmia visualization using Python.</p>
+
+                        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                            <button id="get-started-btn" class="btn-primary shadow-lg" aria-label="Get started">Get Started
+                                <svg class="w-5 h-5 ml-3 -mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                            </button>
+                            <a href="#section-2" class="btn-secondary" onclick="window.navigateToWizardSection(2); return false;">Learn more</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: Introduction -->
+            <section id="section-2" class="wizard-section flex-col justify-center">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Introduction & How It Works</h2>
+                <div class="prose max-w-none text-gray-700">
+                    <p>BeatSense is a tool designed to analyze Electrocardiogram (ECG) signals for potential arrhythmias. By leveraging signal-processing ideas and Python tooling, we provide an interactive, explainable environment to explore ECG traces.</p>
+                    <p>Our platform allows you to:</p>
+                    <ul>
+                        <li>Analyze your own ECG files (MAT, CSV, TXT).</li>
+                        <li>Explore example analyses from the MIT-BIH Arrhythmia Database.</li>
+                    </ul>
+                    <p class="font-semibold">The analysis pipeline:</p>
+                    <ol>
+                        <li><strong>Data Loading:</strong> Supports <code>.mat</code>, <code>.csv</code>, <code>.txt</code>.</li>
+                        <li><strong>Preprocessing:</strong> Filtering to remove baseline wander and high-frequency noise.</li>
+                        <li><strong>R-Peak Detection:</strong> Identify R-peaks and compute RR intervals.</li>
+                        <li><strong>Heart Rate Calculation:</strong> Convert intervals into BPM.</li>
+                        <li><strong>Visualization:</strong> Plot signals and summary statistics.</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Terms -->
+            <section id="section-3" class="wizard-section flex-col justify-center">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Terms & Conditions</h2>
+                <div class="prose max-w-none h-64 overflow-y-auto border border-gray-300 rounded-lg p-4 bg-gray-50 text-gray-700">
+                    <p><strong>IMPORTANT: For Educational & Research Use Only.</strong></p>
+                    <p>BeatSense is NOT a medical device and is NOT intended for clinical diagnosis, treatment, or prevention of any disease. The analysis is educational and should not be used as professional medical advice.</p>
+                    <ul>
+                        <li>Do not use this tool for clinical decision-making.</li>
+                        <li>The developers and providers are not liable for decisions based on these results.</li>
+                        <li>Do not upload personally identifiable health information (PHI).</li>
+                    </ul>
+                </div>
+                <div class="mt-6 flex items-center">
+                    <input id="terms-accept" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" aria-label="Accept terms">
+                    <label for="terms-accept" class="ml-2 block text-sm text-gray-900">I have read, understood, and agree to the Terms & Conditions.</label>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Choose Feature -->
+            <section id="section-4" class="wizard-section flex-col justify-center">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Choose Your Path</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+                    <div id="upload-path-btn" class="feature-card" role="button" tabindex="0" aria-pressed="false" aria-label="Upload your own ECG">
+                        <svg class="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <h3 class="text-xl font-semibold text-gray-900 mt-4">Upload Your Own ECG</h3>
+                        <p class="text-gray-600 text-center mt-2">Analyze a <code>.mat</code>, <code>.csv</code>, or <code>.txt</code> file from your device.</p>
+                    </div>
+
+                    <div id="demo-path-btn" class="feature-card" role="button" tabindex="0" aria-pressed="false" aria-label="Try a demo analysis">
+                        <svg class="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        <h3 class="text-xl font-semibold text-gray-900 mt-4">Try a Demo Analysis</h3>
+                        <p class="text-gray-600 text-center mt-2">Explore pre-computed results from the MIT-BIH Arrhythmia Database.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: Patient Info -->
+            <section id="section-5" class="wizard-section flex-col justify-center">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Patient Information</h2>
+                <p class="text-gray-600 mb-6">Optional metadata for labeling only (not stored or transmitted).</p>
+                <form id="patient-info-form" class="space-y-4 max-w-lg">
+                    <div>
+                        <label for="patient-id" class="block text-sm font-medium text-gray-700">Patient ID / Name</label>
+                        <input type="text" id="patient-id" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 px-3 py-2">
+                    </div>
+                    <div>
+                        <label for="patient-age" class="block text-sm font-medium text-gray-700">Age</label>
+                        <input type="number" id="patient-age" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 px-3 py-2">
+                    </div>
+                    <div>
+                        <label for="patient-gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                        <select id="patient-gender" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 px-3 py-2">
+                            <option value="">Prefer not to say</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </form>
+            </section>
+
+            <!-- SECTION 6: Upload -->
+            <section id="section-6" class="wizard-section flex-col justify-center">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Analyze Your Own ECG</h2>
+                <p class="text-gray-600 mb-6">Upload your ECG file (<code>.mat</code>, <code>.csv</code>, <code>.txt</code>). Ensure the file contains a single column of raw signal data.</p>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <label for="file-upload" class="block text-sm font-medium text-gray-700">Upload File</label>
+                        <input id="file-upload" type="file" class="mt-1 block w-full text-sm text-gray-500" aria-label="ECG file upload">
+                    </div>
+                    <div class="flex-shrink-0 pt-6 w-full md:w-40">
+                        <button id="upload-analyze-btn" class="btn-primary w-full">Analyze File</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 7: Live Demo -->
+            <section id="section-7" class="wizard-section flex-col justify-center">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Live Demo: MIT-BIH Database</h2>
+                <p class="text-gray-600 mb-6">Explore pre-computed results. Select a record to view its analysis.</p>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <label for="record-select" class="block text-sm font-medium text-gray-700">Select Record</label>
+                        <select id="record-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg">
+                            <option value="">-- Choose a record --</option>
+                            <option value="100">Record 100</option>
+                            <option value="101">Record 101</option>
+                            <option value="102">Record 102</option>
+                            <option value="103">Record 103</option>
+                            <option value="104">Record 104</option>
+                            <option value="105">Record 105</option>
+                            <option value="106">Record 106</option>
+                            <option value="107">Record 107</option>
+                            <option value="108">Record 108</option>
+                            <option value="109">Record 109</option>
+                            <option value="111">Record 111</option>
+                            <option value="112">Record 112</option>
+                            <option value="113">Record 113</option>
+                            <option value="114">Record 114</option>
+                            <option value="115">Record 115</option>
+                            <option value="116">Record 116</option>
+                            <option value="117">Record 117</option>
+                            <option value="118">Record 118</option>
+                            <option value="119">Record 119</option>
+                            <option value="121">Record 121</option>
+                            <option value="122">Record 122</option>
+                            <option value="123">Record 123</option>
+                            <option value="124">Record 124</option>
+                            <option value="200">Record 200</option>
+                            <option value="201">Record 201</option>
+                            <option value="202">Record 202</option>
+                            <option value="203">Record 203</option>
+                            <option value="205">Record 205</option>
+                            <option value="207">Record 207</option>
+                            <option value="208">Record 208</option>
+                            <option value="209">Record 209</option>
+                            <option value="210">Record 210</option>
+                            <option value="212">Record 212</option>
+                            <option value="213">Record 213</option>
+                            <option value="214">Record 214</option>
+                            <option value="215">Record 215</option>
+                            <option value="217">Record 217</option>
+                            <option value="219">Record 219</option>
+                            <option value="220">Record 220</option>
+                            <option value="221">Record 221</option>
+                            <option value="222">Record 222</option>
+                            <option value="223">Record 223</option>
+                            <option value="228">Record 228</option>
+                            <option value="230">Record 230</option>
+                            <option value="231">Record 231</option>
+                            <option value="232">Record 232</option>
+                            <option value="233">Record 233</option>
+                            <option value="234">Record 234</option>
+                        </select>
+                    </div>
+                    <div class="flex-shrink-0 pt-6 w-full md:w-40">
+                        <button id="analyze-btn" class="btn-primary w-full">Analyze Record</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 8: Results -->
+            <section id="section-8" class="wizard-section flex-col justify-center">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Analysis Results & Recommendation</h2>
+
+                <div id="analysis-output" class="w-full">
+                    <div id="loading-spinner" class="text-center p-10 hidden">
+                        <svg class="animate-spin h-10 w-10 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <p class="mt-4 text-lg font-medium text-gray-700">Analyzing, please wait...</p>
+                    </div>
+
+                    <div id="error-message" class="hidden p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                        <p><strong>Error:</strong> <span id="error-text"></span></p>
+                    </div>
+
+                    <div id="results-container" class="hidden">
+
+                        <div id="recommendation-panel" class="p-4 rounded-lg mb-6 shadow bg-green-100 border-green-200 text-green-800">
+                            <h3 class="text-lg font-semibold mb-2 flex items-center">
+                                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                <span id="recommendation-title">Analysis Summary</span>
+                            </h3>
+                            <p id="recommendation-text" class="text-gray-700"></p>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-lg shadow-inner mb-6 border border-gray-200">
+                            <canvas id="ecg-chart" width="800" height="240" aria-label="ECG chart"></canvas>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <h4 class="text-sm font-medium text-blue-800">Avg. Heart Rate</h4>
+                                <p id="bpm-display" class="text-3xl font-bold text-blue-900">--</p>
+                                <span class="text-blue-700">BPM</span>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <h4 class="text-sm font-medium text-green-800">Total Beats</h4>
+                                <p id="beats-display" class="text-3xl font-bold text-green-900">--</p>
+                                <span class="text-green-700">R-Peaks</span>
+                            </div>
+                            <div class="bg-yellow-50 p-4 rounded-lg">
+                                <h4 class="text-sm font-medium text-yellow-800">Record Length</h4>
+                                <p id="length-display" class="text-3xl font-bold text-yellow-900">--</p>
+                                <span class="text-yellow-700">Seconds</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">Beat Classifications</h3>
+                            <div class="overflow-x-auto shadow rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-100">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Beat Type</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Symbol</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="class-table-body" class="bg-white divide-y divide-gray-200">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="flex justify-center">
+                    <button id="restart-btn" class="btn-secondary mt-8 mx-auto hidden">Analyze Another</button>
+                </div>
+
+            </section>
+
+        </div>
+
+        <!-- Footer / Navigation -->
+        <footer class="p-4 bg-gray-100 border-t border-gray-200">
+            <div class="flex justify-between items-center">
+                <button id="prev-btn" class="btn-secondary" disabled>Previous</button>
+                <button id="next-btn" class="btn-primary">Next</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- State ---
+            let currentSection = 1;
+            let previousSection = 1;
+            const totalSections = 8;
+            let navigationLocked = false;
+
+            // --- Elements ---
+            const sections = document.querySelectorAll('.wizard-section');
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const footer = nextBtn.closest('footer');
+            const progressIndicator = document.getElementById('progress-indicator');
+            const progressFill = document.getElementById('progress-fill');
+            const termsCheckbox = document.getElementById('terms-accept');
+            const restartBtn = document.getElementById('restart-btn');
+            const getStartedBtn = document.getElementById('get-started-btn');
+            const uploadPathBtn = document.getElementById('upload-path-btn');
+            const demoPathBtn = document.getElementById('demo-path-btn');
+            const mainContentArea = document.getElementById('main-content-area');
+
+            const sectionTitles = [
+                "Welcome", "Introduction", "Terms & Conditions", "Choose Feature",
+                "Patient Info", "Upload File", "Demo Analysis", "Results"
+            ];
+
+            function updateProgressUI() {
+                progressIndicator.textContent = `Step ${currentSection} of ${totalSections}: ${sectionTitles[currentSection - 1]}`;
+                const pct = Math.round(((currentSection - 1) / (totalSections - 1)) * 100);
+                progressFill.style.width = pct + '%';
+                progressFill.parentElement.setAttribute('aria-valuenow', currentSection.toString());
+            }
+
+            function updateUI(sectionNumber) {
+                if (navigationLocked) return;
+                if (sectionNumber < 1 || sectionNumber > totalSections) return;
+
+                previousSection = currentSection;
+                currentSection = sectionNumber;
+
+                sections.forEach((section, index) => {
+                    section.classList.toggle('active', index + 1 === currentSection);
+                });
+
+                updateProgressUI();
+
+                // Adjust padding to allow hero to breathe
+                if (currentSection === 1) {
+                    mainContentArea.classList.remove('p-6', 'md:p-10');
+                } else {
+                    mainContentArea.classList.add('p-6', 'md:p-10');
+                }
+
+                // Default footer visibility
+                footer.style.display = 'flex';
+                nextBtn.style.display = 'inline-flex';
+                restartBtn.classList.add('hidden');
+
+                // Per-section logic
+                switch (currentSection) {
+                    case 1:
+                        prevBtn.disabled = true;
+                        footer.style.display = 'none';
+                        break;
+                    case 3:
+                        prevBtn.disabled = false;
+                        nextBtn.disabled = !termsCheckbox.checked;
+                        break;
+                    case 4:
+                        prevBtn.disabled = false;
+                        footer.style.display = 'none';
+                        break;
+                    case 6:
+                        prevBtn.disabled = false;
+                        nextBtn.style.display = 'none';
+                        break;
+                    case 7:
+                        prevBtn.disabled = false;
+                        nextBtn.style.display = 'none';
+                        break;
+                    case 8:
+                        footer.style.display = 'none';
+                        restartBtn.classList.remove('hidden');
+                        break;
+                    default:
+                        prevBtn.disabled = false;
+                        nextBtn.disabled = false;
+                }
+            }
+
+            window.navigateToWizardSection = updateUI;
+
+            function goToNext() {
+                if (navigationLocked) return;
+                let nextSection = currentSection + 1;
+                if (currentSection === 3) nextSection = 4;
+                if (currentSection === 5) nextSection = 6;
+                updateUI(nextSection);
+            }
+
+            function goToPrev() {
+                if (navigationLocked) return;
+                let prevSection = currentSection - 1;
+                if (currentSection === 5) prevSection = 4;
+                if (currentSection === 7) prevSection = 4;
+                if (currentSection === 8) prevSection = previousSection;
+                updateUI(prevSection);
+            }
+
+            // keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') { goToNext(); }
+                if (e.key === 'ArrowLeft') { goToPrev(); }
+            });
+
+            // --- Event Listeners ---
+            nextBtn.addEventListener('click', goToNext);
+            prevBtn.addEventListener('click', goToPrev);
+            getStartedBtn.addEventListener('click', () => updateUI(2));
+            termsCheckbox.addEventListener('change', () => {
+                if (currentSection === 3) nextBtn.disabled = !termsCheckbox.checked;
+            });
+
+            uploadPathBtn.addEventListener('click', () => updateUI(5));
+            demoPathBtn.addEventListener('click', () => updateUI(7));
+            restartBtn.addEventListener('click', () => {
+                termsCheckbox.checked = false;
+                updateUI(4);
+            });
+
+            // allow Enter/Space on feature cards for accessibility
+            [uploadPathBtn, demoPathBtn].forEach(el => {
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        el.click();
+                    }
+                });
+            });
+
+            updateUI(1);
+        });
+    </script>
+
+    <!-- ANALYZE.JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let ecgChart = null;
+            let isAnalyzing = false;
+
+            const outputContainer = document.getElementById('analysis-output');
+            const spinner = document.getElementById('loading-spinner');
+            const errorMsg = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            const resultsContainer = document.getElementById('results-container');
+            const chartCanvas = document.getElementById('ecg-chart');
+            const bpmDisplay = document.getElementById('bpm-display');
+            const beatsDisplay = document.getElementById('beats-display');
+            const lengthDisplay = document.getElementById('length-display');
+            const classTable = document.getElementById('class-table-body');
+            const recommendationPanel = document.getElementById('recommendation-panel');
+            const recommendationTitle = document.getElementById('recommendation-title');
+            const recommendationText = document.getElementById('recommendation-text');
+
+            const demoRecordSelect = document.getElementById('record-select');
+            const demoAnalyzeBtn = document.getElementById('analyze-btn');
+            const uploadFileInput = document.getElementById('file-upload');
+            const uploadAnalyzeBtn = document.getElementById('upload-analyze-btn');
+
+            const BEAT_EXPLANATIONS = {
+                'N': 'Normal beat', 'L': 'Left bundle branch block', 'R': 'Right bundle branch block',
+                'V': 'Premature ventricular contraction', 'A': 'Atrial premature beat',
+                '/': 'Paced beat', 'f': 'Fusion of paced and normal', 'F': 'Fusion of ventricular and normal',
+                'j': 'Nodal (junctional) escape', 'E': 'Ventricular escape', 'J': 'Nodal (junctional) premature',
+                'e': 'Atrial escape', 'S': 'Supraventricular premature', 'Q': 'Unclassifiable', '?': 'Unknown'
+            };
+
+            function resetAnalysisUI() {
+                outputContainer.classList.add('hidden');
+                spinner.classList.add('hidden');
+                errorMsg.classList.add('hidden');
+                resultsContainer.classList.add('hidden');
+                bpmDisplay.textContent = '--';
+                beatsDisplay.textContent = '--';
+                lengthDisplay.textContent = '--';
+                classTable.innerHTML = '';
+                errorText.textContent = '';
+                recommendationText.textContent = '';
+                if (ecgChart) { ecgChart.destroy(); ecgChart = null; }
+                isAnalyzing = false;
+                demoAnalyzeBtn.disabled = false;
+                uploadAnalyzeBtn.disabled = false;
+            }
+
+            function showLoading() {
+                isAnalyzing = true;
+                outputContainer.classList.remove('hidden');
+                spinner.classList.remove('hidden');
+                errorMsg.classList.add('hidden');
+                resultsContainer.classList.add('hidden');
+            }
+
+            async function handleDemoAnalyze() {
+                if (isAnalyzing) return;
+                const recordName = demoRecordSelect.value;
+                if (!recordName) { alert("Please select a record first."); return; }
+                demoAnalyzeBtn.disabled = true;
+                showLoading();
+
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 1200));
+                    const data = simulateAnalysisData(recordName);
+                    if (recordName === '108') throw new Error("Simulated load failure for record 108.");
+                    displayResults(data);
+                    window.navigateToWizardSection(8);
+                } catch (error) {
+                    displayError(error.message);
+                    window.navigateToWizardSection(8);
+                }
+            }
+
+            async function handleUploadAnalyze() {
+                if (isAnalyzing) return;
+                const file = uploadFileInput.files[0];
+                if (!file) { alert("Please select a file first."); return; }
+                uploadAnalyzeBtn.disabled = true;
+                showLoading();
+
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 1200));
+                    const data = simulateAnalysisData(file.name);
+                    displayResults(data);
+                    window.navigateToWizardSection(8);
+                } catch (error) {
+                    displayError(error.message);
+                    window.navigateToWizardSection(8);
+                }
+            }
+
+            function displayResults(data) {
+                spinner.classList.add('hidden');
+                resultsContainer.classList.remove('hidden');
+                bpmDisplay.textContent = data.bpm || '--';
+                beatsDisplay.textContent = data.r_peaks ? data.r_peaks.length : '--';
+                lengthDisplay.textContent = data.record_length_sec || '--';
+
+                classTable.innerHTML = '';
+                if (data.beat_counts && Object.keys(data.beat_counts).length > 0) {
+                    for (const [symbol, count] of Object.entries(data.beat_counts)) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${BEAT_EXPLANATIONS[symbol] || 'Unknown'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${symbol}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${count}</td>
+                        `;
+                        classTable.appendChild(row);
+                    }
+                } else {
+                    classTable.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">No classification data available.</td></tr>';
+                }
+
+                if (data.signal && data.r_peaks) {
+                    renderChart(data.signal, data.r_peaks, chartCanvas);
+                }
+                generateRecommendation(data);
+            }
+
+            function generateRecommendation(data) {
+                let title = "Analysis Complete";
+                let text = "The ECG analysis is complete. All metrics appear within normal ranges for this segment.";
+                let panelClass = "bg-green-100 border-green-200 text-green-800";
+
+                const hasAbnormalBeats = data.beat_counts && (data.beat_counts['V'] || data.beat_counts['A']);
+
+                if (data.bpm > 100) {
+                    title = "Tachycardia Detected (Fast Heart Rate)";
+                    text = `The average heart rate of ${data.bpm} BPM is faster than the typical 60-100 BPM range. This is for educational viewing only.`;
+                    panelClass = "bg-yellow-100 border-yellow-300 text-yellow-800";
+                } else if (data.bpm < 60) {
+                    title = "Bradycardia Detected (Slow Heart Rate)";
+                    text = `The average heart rate of ${data.bpm} BPM is slower than the typical 60-100 BPM range. This is for educational viewing only.`;
+                    panelClass = "bg-yellow-100 border-yellow-300 text-yellow-800";
+                }
+
+                if (hasAbnormalBeats) {
+                    title = "Abnormal Beats Detected";
+                    text = `The analysis identified potential abnormal beat types (e.g., 'V' or 'A'). This is for educational viewing only.`;
+                    panelClass = "bg-red-100 border-red-300 text-red-800";
+                }
+
+                recommendationPanel.className = `p-4 rounded-lg mb-6 shadow ${panelClass}`;
+                recommendationTitle.textContent = title;
+                recommendationText.textContent = text;
+            }
+
+            function displayError(message) {
+                spinner.classList.add('hidden');
+                errorMsg.classList.remove('hidden');
+                errorText.textContent = message;
+
+                recommendationPanel.className = "p-4 rounded-lg mb-6 shadow bg-red-100 border-red-300 text-red-800";
+                recommendationTitle.textContent = "Analysis Failed";
+                recommendationText.textContent = "Could not complete the analysis. Please check the file or try again.";
+            }
+
+            function renderChart(signal, rPeaks, canvas) {
+                if (ecgChart) ecgChart.destroy();
+                const ctx = canvas.getContext('2d');
+                const rPeakData = rPeaks.map(index => ({ x: index, y: signal[index] }));
+                const labels = Array.from({ length: signal.length }, (_, i) => i);
+
+                ecgChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'ECG Signal',
+                                data: signal,
+                                borderColor: 'rgb(59, 130, 246)',
+                                borderWidth: 1.6,
+                                pointRadius: 0,
+                                tension: 0.12
+                            },
+                            {
+                                type: 'scatter',
+                                label: 'R-Peaks',
+                                data: rPeakData,
+                                backgroundColor: 'rgb(239, 68, 68)',
+                                pointRadius: 5,
+                                showLine: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: false,
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Sample Index' },
+                                ticks: { maxTicksLimit: 20 },
+                                grid: { color: 'rgba(226, 232, 240, 0.7)' }
+                            },
+                            y: {
+                                title: { display: true, text: 'Amplitude (mV)' },
+                                grid: { color: 'rgba(226, 232, 240, 0.7)' }
+                            }
+                        },
+                        plugins: { legend: { position: 'top' }, tooltip: { enabled: true, mode: 'index', intersect: false } },
+                        interaction: { mode: 'nearest', axis: 'x', intersect: false }
+                    }
+                });
+            }
+
+            function simulateAnalysisData(recordName) {
+                const signalLength = 3000;
+                const signal = [];
+                const rPeaks = [];
+                for (let i = 0; i < signalLength; i++) {
+                    let y = Math.sin(i / 20) * 0.5;
+                    if (i % 300 === 0) {
+                        y = 2.5; rPeaks.push(i); signal.push(y);
+                        signal.push(0.5); i++; signal.push(-1.5); i++; signal.push(0.2); i++;
+                    } else {
+                        signal.push(y + (Math.random() - 0.5) * 0.1);
+                    }
+                }
+                const beat_counts = {'N': 8, 'V': 2};
+                if (recordName.includes('101')) {
+                    beat_counts['V'] = 0;
+                }
+                return {
+                    record_name: recordName, bpm: recordName.includes('101') ? 72 : 95, r_peaks: rPeaks,
+                    signal: signal.slice(0, 3000), record_length_sec: (signalLength / 360).toFixed(1),
+                    beat_counts: beat_counts
+                };
+            }
+
+            // --- Event Listeners ---
+            demoRecordSelect.addEventListener('change', resetAnalysisUI);
+            uploadFileInput.addEventListener('change', resetAnalysisUI);
+            demoAnalyzeBtn.addEventListener('click', handleDemoAnalyze);
+            uploadAnalyzeBtn.addEventListener('click', handleUploadAnalyze);
+        });
+    </script>
+</body>
+</html>
